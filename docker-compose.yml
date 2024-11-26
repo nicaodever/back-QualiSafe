@@ -1,0 +1,34 @@
+version: '3.11'
+
+services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - db_python:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=qualidade
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin123
+    ports:
+      - "5432:5432"
+
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./qualidade:/app
+    command: >
+      sh -c  "python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=qualidade
+      - DB_USER=postgres
+      - DB_PASSWORD=admin123
+    depends_on:
+      - db
+
+volumes:
+  db_python:
